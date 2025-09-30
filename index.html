@@ -65,6 +65,7 @@
         let timerInterval; let totalTime = 0; let startTime; let quizData = []; let currentQuestionIndex = 0; let score = 0;
         const TOTAL_QUESTIONS = 3; const problemTypes = ["moving_axis", "moving_domain_right", "moving_domain_left", "moving_domain_both", "moving_all_linked"];
         
+        // 改善点4：式を整形する関数
         function formatTerm(coeff, variable = '', isFirst = false) {
             if (coeff === 0) return '';
             let sign = coeff > 0 ? ' + ' : ' - ';
@@ -83,7 +84,7 @@
         
         function generateProblem(type) {
             let question = '', choices = [], answer = '', explanation = '', graphParams = [];
-            const p = 2; const down = Math.random() < 0.5; const funcSymbol = down ? `-` : ``; const funcSign = down ? -1 : 1; 
+            const p = 2; const down = Math.random() < 0.5; const funcSymbol = down ? `-` : ``; const funcSign = down ? -1 : 1;
             const askForMax = Math.random() < 0.5; const minMaxText = askForMax ? '最大値' : '最小値';
             const isStandardProblem = (down && askForMax) || (!down && !askForMax); 
 
@@ -120,8 +121,8 @@
                     answer = `\\( ${x1} < a < ${axis_x} \\), \\( a \\ge ${axis_x} \\)`; 
                     choices = [ answer, `\\( a < \\frac{${x1+axis_x}}{2}, \\ a \\ge \\frac{${x1+axis_x}}{2} \\)`, `\\( a > ${axis_x} \\)`, `\\( a < ${x1} \\)` ];
                     explanation = `<h4>考え方</h4><p><b>定義域に軸 \\(x=${axis_x}\\) が含まれるか</b>で場合分け。</p>
-                        <ol><li><b>${x1} < a < ${axis_x}</b>: ${minMaxText}は \\(x=a\\)</li>
-                        <li><b>a ≥ ${axis_x}</b>: ${minMaxText}は頂点 \\(x=${axis_x}\\)</li></ol>`;
+                        <ol><li><b>${x1} < a < ${axis_x}</b>: ${minMaxText}は \\(x=a\\)で、値は \\(${funcSymbol}${p}(a-${axis_x})^2 + ${vertex_y}\\)</li>
+                        <li><b>a ≥ ${axis_x}</b>: ${minMaxText}は頂点 \\(x=${axis_x}\\)で、値は \\(${vertex_y}\\)</li></ol>`;
                     graphParams = [ { down, axisPos: 150, domainPos: {start: 80, end: 120}, label: `a < 軸`, caseText: `x=${axis_x}`, domainStartLabel: x1, domainEndLabel: 'a' }, { down, axisPos: 150, domainPos: {start: 80, end: 180}, label: `a ≥ 軸`, caseText: `x=${axis_x}`, domainStartLabel: x1, domainEndLabel: 'a' } ];
                 } else {
                     const symmetric_point = 2 * axis_x - x1;
@@ -136,9 +137,9 @@
                 answer = `\\( 0 < a < ${k} \\), \\( a = ${k} \\), \\( a > ${k} \\)`; 
                 choices = [ answer, `\\( a < ${k}/2, \\ a \\ge ${k}/2 \\)`, `\\( a < ${k}, \\ a > ${k} \\)`, `\\( a > 0 \\)` ];
                 explanation = `<h4>考え方</h4><p>軸は \\(x=a\\)。最大値は<b>軸から遠い方の端点</b>でとる。軸と両端 (\\(0, a+${k}\\)) の距離 \\(a\\) と \\(${k}\\) で場合分け。</p>`;
-                graphParams = [ { down: false, axisPos: 100, domainPos: {start: 70, end: 170}, label: `a < ${k}`, caseText: 'x=a', domainStartLabel: '0', domainEndLabel: `a+${k}` }];
+                graphParams = [ { down: false, axisPos: 100, domainPos: {start: 70, end: 170}, label: `a < k`, caseText: 'x=a', domainStartLabel: '0', domainEndLabel: `a+${k}` }, { down: false, axisPos: 120, domainPos: {start: 70, end: 170}, label: `a = k`, caseText: 'x=a', domainStartLabel: '0', domainEndLabel: `a+${k}` }, { down: false, axisPos: 140, domainPos: {start: 70, end: 170}, label: `a > k`, caseText: 'x=a', domainStartLabel: '0', domainEndLabel: `a+${k}` } ];
             }
-            while (choices.length < 4) { choices.push(`ダミー選択肢`); } // 選択肢が4つ未満の場合の保険
+            while (choices.length < 4) { choices.push(`\\( a > 100 \\)`); } // 選択肢が4つ未満の場合のダミー
             return { type, question, choices, answer, explanation, graphParams };
         }
 
@@ -192,7 +193,7 @@
 
         function recordToSheet() {
             const name = document.getElementById('name').value;
-            const GAS_URL = 'https://script.google.com/macros/s/AKfycbwXkwNnWEJ84urMGCwQgVrycf5ictFI9S0GGH29JNh4d7LuII7fzC4oNPkftqQ1hZPLIw/exec'; 
+            const GAS_URL = 'https://script.google.com/macros/s/AKfycbwGN978Z4V-EeqroVpBSPk2BGiKJ48clbzQrMdqS7q6xRyhP8c7mz2GSiJ2ghU-Gh57/exec'; 
             if (GAS_URL.includes('貼り付け')) { console.log('GASのURLが設定されていません。'); return; }
             const data = { name: name, time: totalTime, score: score, timestamp: new Date().toISOString() };
             fetch(GAS_URL, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) }).catch(console.error);
@@ -205,5 +206,4 @@
     <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
     <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
 </body>
-
 </html>
